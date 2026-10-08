@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长征路上的三段岔路</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Georgia','Noto Serif SC',serif;background:#1a1a2e;color:#e0d8c8;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.container{max-width:680px;width:100%}
+.card{background:#16213e;border:1px solid #8b4513;border-radius:8px;padding:30px 25px;box-shadow:0 4px 20px rgba(0,0,0,.5);position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8b0000,#cd853f,#8b0000)}
+.header{text-align:center;margin-bottom:20px}
+.header h1{font-size:1.5em;color:#cd853f;letter-spacing:2px;margin-bottom:5px}
+.header .subtitle{font-size:.8em;color:#8b7355}
+.scene{margin-bottom:20px;line-height:1.8;font-size:.95em}
+.scene-text{color:#d4c8a8;margin-bottom:15px;text-indent:2em}
+.narrator{color:#7eb8da;font-style:italic;border-left:2px solid #4a5568;padding-left:12px;margin:12px 0}
+.choices{display:flex;flex-direction:column;gap:10px;margin:15px 0}
+.choice-btn{background:#1a1a2e;border:1px solid #4a5568;color:#d4c8a8;padding:14px 18px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:.9em;transition:all .3s;text-align:left;line-height:1.5}
+.choice-btn:hover{border-color:#cd853f;background:#16213e;transform:translateX(4px)}
+.choice-btn .label{color:#cd853f;font-weight:bold;margin-right:8px}
+.hidden{display:none}
+.progress{display:flex;justify-content:center;gap:8px;margin:15px 0}
+.dot{width:12px;height:12px;border-radius:50%;border:1px solid #4a5568}
+.dot.active{background:#cd853f;border-color:#cd853f}
+.dot.done{background:#556b2f;border-color:#556b2f}
+.timer{text-align:center;font-size:.75em;color:#666;margin-top:10px}
+.ending{margin:20px 0;padding:18px;border-radius:6px;border:1px solid}
+.ending h2{font-size:1.15em;margin-bottom:10px;letter-spacing:1px}
+.ending-bad{border-color:#8b0000;background:rgba(139,0,0,.15)}
+.ending-bad h2{color:#cd5c5c}
+.ending-mid{border-color:#8b6914;background:rgba(139,105,20,.15)}
+.ending-mid h2{color:#daa520}
+.ending-good{border-color:#556b2f;background:rgba(85,107,47,.15)}
+.ending-good h2{color:#9acd32}
+.epilogue{background:rgba(139,69,19,.1);border:1px solid #8b4513;border-radius:6px;padding:18px;margin:20px 0}
+.epilogue .question{color:#cd853f;font-size:1em;line-height:1.7;margin-bottom:15px;font-style:italic}
+.textarea{width:100%;background:#0d1b2a;border:1px solid #4a5568;color:#d4c8a8;border-radius:4px;padding:10px;font-family:inherit;font-size:.85em;resize:vertical;min-height:100px;line-height:1.6}
+.textarea:focus{outline:none;border-color:#cd853f}
+.label-tag{font-size:.75em;color:#8b7355;margin-bottom:5px;display:block}
+.submit-btn{background:#8b0000;color:#e0d8c8;border:none;padding:10px 25px;border-radius:4px;font-family:inherit;font-size:.85em;cursor:pointer;margin-top:10px;letter-spacing:1px}
+.submit-btn:hover{background:#a52a2a}
+.flowchart{margin:20px 0;text-align:center}
+.flowchart svg{max-width:100%;height:auto}
+.restart-btn{display:block;margin:20px auto 0;background:transparent;border:1px solid #cd853f;color:#cd853f;padding:8px 20px;border-radius:4px;font-family:inherit;cursor:pointer;font-size:.85em}
+.restart-btn:hover{background:#cd853f;color:#1a1a2e}
+.fade-in{animation:fadeIn .5s ease-in}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.card{padding:20px 15px}.header h1{font-size:1.2em}.scene-text{font-size:.85em}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<div class="header">
+<h1>长征路上的三段岔路</h1>
+<div class="subtitle">1934年4月 — 1935年1月 · 红一军团 · 你的抉择</div>
+</div>
+<div id="content"></div>
+</div>
+</div>
+
+<script>
+const state={step:0,choices:[]};
+const scenes=[
+{
+period:'1934年4月 · 广昌',
+narrator:'老班长周铁山递来一壶凉水，望了望硝烟未散的阵地。',
+text:'广昌。李德的堡垒对蒋介石的钢甲。红一军团奉命"死守"，阵地在敌机轮番轰炸下一寸寸碎裂。三天的仗打下来，连排长伤亡过半。团部来了急电：继续坚守，寸土不让。你站在掩体里，面前摊着地图。周铁山蹲过来，只问了一句——',
+question:'"参谋，这条路，走不走？"',
+options:[
+{label:'A',text:'照命令死守。纪律是铁，上级说守就守，不能因为伤亡大就动摇。'},
+{label:'B',text:'建议主动撤离，避实击虚。广昌无险可守，拿人命填堡垒换不来胜利。'}
+]
+},
+{
+period:'1934年12月 · 湘江之后',
+narrator:'渡过湘江的夜里，周铁山数了数幸存的面孔，沉默了很久。',
+text:'湘江。八万六千人的队伍，过江后只剩三万。江水还是红的。远处枪声没断。原定计划是北上湘西，和红二、六军团会合。可前面情报说，蒋介石已经调了二十万人在湘西张开口袋。周铁山擦着枪，又问了一句——',
+question:'"参谋，这条路，走不走？"',
+options:[
+{label:'A',text:'按原计划北上湘西。计划是上面定的，会合是大事，不能因为敌人多就改路线。'},
+{label:'B',text:'转兵贵州。敌人重兵在湘西等着，贵州军阀弱、空隙大，应该避实就虚。'}
+]
+},
+{
+period:'1935年1月 · 遵义',
+narrator:'进了遵义城，周铁山难得露出一点笑容，蹲在城墙根晒太阳。',
+text:'遵义。湘江之后一路疾行，终于进了这座小城。上面在开会，据说吵得很凶。有人说要继续听远方的指挥，有人说该让懂中国的人来带路。你坐在作战室的角落，面前摊着一堆电报和条令本本。周铁山走进来，第三次问你——',
+question:'"参谋，这条路，走不走？"',
+options:[
+{label:'A',text:'听远方的"本本"和条令。共产国际和上级的指示不能动摇，经验再惨也要按规矩来。'},
+{label:'B',text:'让懂中国情况的人指挥。条令是死的，中国的山川和敌情是活的，该换指挥了。'}
+]
+}
+];
+
+const endings={
+bad:{
+title:'照本本走到底',
+class:'ending-bad',
+text:'三段路，你都选了"本本"。\n\n广昌死守——红一军团伤亡过半，阵地还是丢了。\n湘江之后北上——正好钻进蒋介石二十万大军在湘西布好的口袋，队伍再遭重创。\n遵义仍听远方——指挥没有更换，同样的打法继续，部队在贵州山区一路减员。\n\n1935年春天，你所在的那支队伍，没能走出贵州的大山。周铁山最后一次问你"参谋，走不走"的时候，身边只剩下不到一百人。\n\n照着本本走，本本没有告诉你中国的山有多高、路有多远、敌人有多狡猾。'
+},
+mid:{
+title:'边打边想办法',
+class:'ending-mid',
+text:'三段路，你有一次选择了"从实际出发"。\n\n你在某个关头松了手，让队伍避开了最致命的硬碰硬。但其余两次，你还是听了本本。伤亡没有到最坏的程度，可队伍一路在减员，始终没能真正扭转被动。\n\n你活着走下了长征的路。但你知道，如果每次都敢信自己的判断，如果每次都让懂中国的人来指挥，也许更多人能活着走下来。\n\n——这就是"边打边想办法"的代价：活了下来，但本可以活更多人。'
+},
+good:{
+title:'从中国实际出发',
+class:'ending-good',
+text:'三段路，你至少有两次选择了"从中国实际出发"。\n\n广昌——你建议撤离，保住了有生力量。\n湘江之后——你支持转兵贵州，避开了二十万大军的口袋。\n遵义——你支持让懂中国情况的人来指挥。\n\n1935年1月，遵义会议召开，确立了毛泽东在党和红军中的领导地位。此后，四渡赤水出奇兵，巧渡金沙江，强渡大渡河，飞夺泸定桥，翻雪山过草地——队伍越打越活，越走越有方向。\n\n1936年10月，红军三大主力在甘肃会宁胜利会师。长征，胜利了。\n\n2026年，长征胜利90周年。你走过的三段岔路，就是"马克思主义中国化"从血与火里走出来的路。'
+}
+};
+
+function getEnding(bCount){
+if(bCount===0)return endings.bad;
+if(bCount===1)return endings.mid;
+return endings.good;
+}
+
+function render(){
+const c=document.getElementById('content');
+if(state.step===0){
+c.innerHTML=`<div class="scene fade-in"><div style="text-align:center;margin-bottom:15px"><div style="color:#8b7355;font-size:.8em;margin-bottom:8px">你是红一军团一名22岁的作战参谋</div><div style="color:#7eb8da;font-style:italic;line-height:1.7;padding:10px 0">同行三年的老班长"周铁山"：四十岁上下，打过五次反"围剿"，话不多。每到关键节点，只问你一句——<br><br><span style="color:#cd853f">"参谋，这条路，走不走？"</span></div></div><div class="progress"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><div style="text-align:center;margin:20px 0"><button class="choice-btn" style="display:inline-block;border-color:#cd853f;color:#cd853f;text-align:center" onclick="startGame()">出发</button></div><div class="timer">预计用时：4-6分钟 · 三次选择不可回改</div></div>`;
+return;
+}
+if(state.step<=3){
+const s=scenes[state.step-1];
+const dots=[1,2,3].map(i=>`<div class="dot ${i<state.step?'done':i===state.step?'active':''}"></div>`).join('');
+c.innerHTML=`<div class="scene fade-in"><div style="color:#cd853f;font-size:.85em;letter-spacing:1px;margin-bottom:8px">${s.period}</div><div class="narrator">${s.narrator}</div><div class="scene-text">${s.text}</div><div style="color:#cd853f;font-style:italic;text-align:center;margin:15px 0;font-size:1.05em">${s.question}</div><div class="progress">${dots}<div class="dot"></div></div><div class="choices">${s.options.map((o,i)=>`<button class="choice-btn" onclick="choose(${i})"><span class="label">${o.label}</span>${o.text}</button>`).join('')}</div></div>`;
+return;
+}
+if(state.step===4){
+const bCount=state.choices.filter(c=>c===1).length;
+const e=getEnding(bCount);
+c.innerHTML=`<div class="scene fade-in"><div class="progress"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div></div><div class="ending ${e.class}"><h2>${e.title}</h2><div style="white-space:pre-line;line-height:1.8;font-size:.9em;color:#d4c8a8">${e.text}</div></div><button class="restart-btn" onclick="showSummary()">查看抉择路线</button></div>`;
+return;
+}
+if(state.step===5){
+const bCount=state.choices.filter(c=>c===1).length;
+const e=getEnding(bCount);
+c.innerHTML=`<div class="scene fade-in"><div class="progress"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div></div><div class="ending ${e.class}"><h2>${e.title}</h2><div style="white-space:pre-line;line-height:1.8;font-size:.9em;color:#d4c8a8">${e.text}</div></div><div class="epilogue"><div class="question">周铁山靠在墙上，卷了根烟，慢慢说：<br><br>"参谋，同样叫马克思主义，为什么走进中国的山川与敌情，队伍就活了？"</div><div class="label-tag">请用一句话回答"为什么要马克思主义中国化时代化"：</div><textarea class="textarea" id="answer1" placeholder="在这里写下你的一句话回答……"></textarea></div><div class="epilogue"><div class="label-tag">抉择手记（150字以内）：</div><div style="font-size:.8em;color:#8b7355;margin-bottom:8px;line-height:1.6">① 我走过的三个路口与结局：<br>② 哪个路口最要命，为什么：<br>③ 那一句话回答：</div><textarea class="textarea" id="answer2" placeholder="在这里写下你的抉择手记……" style="min-height:120px"></textarea><button class="submit-btn" onclick="submitNote()">提交手记</button></div></div>`;
+return;
+}
+if(state.step===6){
+const bCount=state.choices.filter(c=>c===1).length;
+const path=state.choices.map((c,i)=>c===0?'A':'B').join(' → ');
+c.innerHTML=`<div class="scene fade-in"><div style="text-align:center;color:#9acd32;margin-bottom:15px;font-size:.9em">抉择完成 ✓</div><div class="flowchart"><div style="color:#cd853f;font-size:.85em;margin-bottom:10px">三条岔路，你走的是：</div><div style="font-size:1.1em;color:#daa520;letter-spacing:2px;margin-bottom:15px">${path}</div><svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#666"/></marker></defs><rect x="150" y="10" width="100" height="30" rx="4" fill="#1a1a2e" stroke="#cd853f" stroke-width="1.5"/><text x="200" y="30" text-anchor="middle" fill="#cd853f" font-size="11">三段岔路</text><line x1="200" y1="40" x2="80" y2="70" stroke="#666" stroke-width="1" marker-end="url(#arrow)"/><line x1="200" y1="40" x2="200" y2="70" stroke="#666" stroke-width="1" marker-end="url(#arrow)"/><line x1="200" y1="40" x2="320" y2="70" stroke="#666" stroke-width="1" marker-end="url(#arrow)"/><rect x="30" y="75" width="100" height="30" rx="4" fill="rgba(139,0,0,.15)" stroke="#8b0000" stroke-width="1.5"/><text x="80" y="95" text-anchor="middle" fill="#cd5c5c" font-size="10">AAA 照本本</text><rect x="150" y="75" width="100" height="30" rx="4" fill="rgba(139,105,20,.15)" stroke="#8b6914" stroke-width="1.5"/><text x="200" y="95" text-anchor="middle" fill="#daa520" font-size="10">B×1 边打边活</text><rect x="270" y="75" width="100" height="30" rx="4" fill="rgba(85,107,47,.15)" stroke="#556b2f" stroke-width="1.5"/><text x="320" y="95" text-anchor="middle" fill="#9acd32" font-size="10">B×2-3 从实际出发</text><line x1="80" y1="105" x2="80" y2="135" stroke="#666" stroke-width="1" marker-end="url(#arrow)"/><line x1="200" y1="105" x2="200" y2="135" stroke="#666" stroke-width="1" marker-end="url(#arrow)"/><line x1="320" y1="105" x2="320" y2="135" stroke="#666" stroke-width="1" marker-end="url(#arrow)"/><rect x="30" y="140" width="100" height="35" rx="4" fill="rgba(139,0,0,.1)" stroke="#8b0000" stroke-width="1"/><text x="80" y="155" text-anchor="middle" fill="#cd5c5c" font-size="9">钻进口袋</text><text x="80" y="167" text-anchor="middle" fill="#cd5c5c" font-size="9">损失惨重</text><rect x="150" y="140" width="100" height="35" rx="4" fill="rgba(139,105,20,.1)" stroke="#8b6914" stroke-width="1"/><text x="200" y="155" text-anchor="middle" fill="#daa520" font-size="9">一路减员</text><text x="200" y="167" text-anchor="middle" fill="#daa520" font-size="9">活着走下来</text><rect x="270" y="140" width="100" height="35" rx="4" fill="rgba(85,107,47,.1)" stroke="#556b2f" stroke-width="1"/><text x="320" y="155" text-anchor="middle" fill="#9acd32" font-size="9">遵义会议</text><text x="320" y="167" text-anchor="middle" fill="#9acd32" font-size="9">四渡赤水·会师</text><rect x="150" y="195" width="100" height="30" rx="4" fill="#1a1a2e" stroke="#cd853f" stroke-width="1.5"/><text x="200" y="215" text-anchor="middle" fill="#cd853f" font-size="10">马克思主义中国化</text><line x1="320" y1="175" x2="220" y2="195" stroke="#556b2f" stroke-width="1.5" marker-end="url(#arrow)"/><line x1="200" y1="175" x2="200" y2="195" stroke="#8b6914" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrow)"/><line x1="80" y1="175" x2="180" y2="195" stroke="#8b0000" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrow)"/><text x="200" y="250" text-anchor="middle" fill="#8b7355" font-size="9">实线=直接达成 · 虚线=代价达成</text></svg></div><div class="epilogue" style="text-align:center"><div style="color:#cd853f;font-size:.95em;line-height:1.7">"马克思主义必须同中国具体实际相结合、同中华优秀传统文化相结合。<br>这就是马克思主义中国化时代化。"</div><div style="margin-top:10px;font-size:.8em;color:#8b7355">—— 你走过的三段岔路，就是这个命题的血与火版本</div></div><button class="restart-btn" onclick="restart()">重新走一遍</button></div>`;
+return;
+}
+}
+
+function startGame(){state.step=1;render()}
+function choose(i){state.choices.push(i);state.step++;render()}
+function showSummary(){state.step=6;render()}
+function restart(){state.step=0;state.choices=[];render()}
+render();
+</script>
+</body>
+</html>
